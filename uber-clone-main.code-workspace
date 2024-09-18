@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"name": "uber-clone-main",
+			"path": "."
+		},
+		{
+			"name": "supabase-functions",
+			"path": "supabase/functions"
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"supabase/functions/": true
+		},
+		"deno.importMap": "./supabase/functions/import_map.json",
+		"deno.enable": true
+	}
+}

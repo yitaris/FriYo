@@ -95,45 +95,37 @@ const Layout = () => (
     }}
   >
     <Tabs.Screen
-      name="maps"
-      options={{
-        title: "Map",
-        headerShown: false,
-        tabBarStyle: {display:'none'},
-        tabBarIcon: ({ focused }) => <TabIcon focused={focused} source={icons.map} />,
-      }}
-    />
-    <Tabs.Screen
-      name="home"
-      options={{
-        title: "Home",
-        headerShown: false,
-        tabBarIcon: ({ focused }) => <TabIcon focused={focused} source={icons.home} />,
-      }}
-    />
-    <Tabs.Screen
-      name="rides"
-      options={{
-        title: "Rides",
-        headerShown:false,
-        tabBarIcon: ({ focused }) => <TabIcon focused={focused} source={icons.list}
-        />,
-      }}
-    />
-    <Tabs.Screen
-      name="chat"
-      options={{
-        title: "Chat",
-        headerShown: false,
-        tabBarIcon: ({ focused }) => <TabIcon focused={focused} source={icons.chat} />,
-      }}
-    />
-    <Tabs.Screen
-      name="profile"
+      name="userProfile"
       options={{
         title: "",
         tabBarStyle: { display: 'none' },
         headerShown: true,
+        headerLeft: () => {
+          const router = useRouter();
+          return (
+            <TouchableOpacity
+            onPress={()=>{router.push('/(root)/(tabs)/home')}}
+            style={{padding:12}}
+            >
+              <Image
+                source={icons.arrowLeft}
+                style={{width:50,height:50}}
+              />
+            </TouchableOpacity>
+          );
+        },
+        tabBarIcon: ({ focused }) => <TabIcon focused={focused} source={icons.profile} />,
+      }}
+    />
+    <Tabs.Screen
+      name="notifications"
+      options={{
+        title: "",
+        tabBarStyle: { display: 'none' },
+        headerShown: true,
+        headerStyle: {
+          backgroundColor:'#1a1a1a'
+        },
         headerLeft: () => {
           const router = useRouter();
           return (

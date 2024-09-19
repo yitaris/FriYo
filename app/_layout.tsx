@@ -53,13 +53,8 @@ if (!publishableKey) {
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(root)" options={{ headerShown: false }} />
+        <Stack.Screen name="(modals)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
-        <Stack.Screen
-        name="(modals)/mapsModal"
-        options={{
-          presentation: "modal",
-          title: "Giriş Yap",}}
-      />
       </Stack>
         </ClerkLoaded>
         </SupabaseProvider>

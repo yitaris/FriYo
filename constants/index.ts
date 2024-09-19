@@ -39,6 +39,9 @@ import restaurantIcon from "@/assets/icons/restaurantIcon.png";
 import storeIcon from "@/assets/icons/storeIcon.png";
 import settingIcon from '@/assets/icons/settingIcon.png';
 import notificationIcon from '@/assets/icons/notificationIcon.png';
+import addFriendIcon from '@/assets/icons/addFriendIcon.png';
+import settingWhiteIcon from '@/assets/icons/settingWhiteIcon.png';
+import editIcon from '@/assets/icons/editIcon.png'
 
 export const images = {
     onboarding4,
@@ -84,7 +87,10 @@ export const icons = {
     restaurantIcon,
     storeIcon,
     settingIcon,
-    notificationIcon
+    notificationIcon,
+    addFriendIcon,
+    settingWhiteIcon,
+    editIcon
 };
 
 export const onboarding = [

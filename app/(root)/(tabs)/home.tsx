@@ -14,6 +14,7 @@ import {
 import { useFetch } from "@/lib/fetch";
 import { useLocationStore } from "@/store";
 import { Ride } from "@/types/type";
+import { icons, images } from "@/constants";
 
 const Home = () => {
   const { user } = useUser();
@@ -21,18 +22,9 @@ const Home = () => {
 
   const { setUserLocation, setDestinationLocation } = useLocationStore();
 
-  const handleSignOut = () => {
-    signOut();
-    router.replace("/(auth)/sign-in");
-  };
-
   const [hasPermission, setHasPermission] = useState<boolean>(false);
 
-  const {
-    data: recentRides,
-    loading,
-    error,
-  } = useFetch<Ride[]>(`/(api)/ride/${user?.id}`);
+
 
   useEffect(() => {
     (async () => {
@@ -75,6 +67,12 @@ const Home = () => {
         >
           Hoşgeldiniz {user?.firstName} 👋
         </Text>
+        <TouchableOpacity onPress={()=>{router.push('/(modals)\\notifications')}}>
+          <Image
+          source={icons.notificationIcon}
+          style={{width:40,height:40}}
+          />
+        </TouchableOpacity>
       </View>
     </View>
   );

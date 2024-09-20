@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
-import React, { useEffect, useState,useMemo,useRef } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Link, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -16,7 +16,7 @@ import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { useSupabase } from "@/context/SupabaseContext";
 
 const Page = () => {
-  const { updateCard } = useSupabase();
+  const { updateCard, fetchFollowData } = useSupabase();
   const snapPoints = useMemo(() => ['20', '50%', '90%'], [])
   const bottomSheetRef = useRef<BottomSheet>(null);
   const { user } = useUser();
@@ -29,12 +29,30 @@ const Page = () => {
     user?.emailAddresses[0].emailAddress ?? ""
   );
 
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+
   useEffect(() => {
     // Diğer kullanıcı bilgilerini güncelle
     setUserName(user?.username ?? "");
     setFirstName(user?.firstName ?? "");
     setLastName(user?.lastName ?? "");
     setEmail(user?.emailAddresses[0].emailAddress ?? "");
+    const fetchFollowCounts = async () => {
+      try {
+        if (user?.id) {
+          const followData = await fetchFollowData(user?.id);
+
+          if (followData) {
+            setFollowerCount(followData.followers.length); // Takipçi sayısını ayarla
+            setFollowingCount(followData.following.length); // Takip edilen sayısını ayarla
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching follow data:", error);
+      }
+    };
+    fetchFollowCounts();
   }, [user]);
 
   const onCaptureImage = async () => {
@@ -64,17 +82,17 @@ const Page = () => {
         await user?.setProfileImage({
           file: base64Image, // Upload base64 image to Clerk
         });
-  
+
         // After updating the image, Clerk automatically updates the `user` object.
         // The updated user profile URL should now be available in `user.profileImageUrl`.
         const refreshedUser = await user?.reload();
         const profileUrl = refreshedUser?.externalAccounts[0]?.imageUrl ?? refreshedUser?.imageUrl;
-  
+
         // Check if the profile URL was successfully retrieved
         if (profileUrl) {
           // Update the avatar_url in Supabase
-          const supabaseResponse = await updateCard(profileUrl,user?.id); // Assuming updateCard updates the user's avatar in Supabase
-  
+          const supabaseResponse = await updateCard(profileUrl, user?.id); // Assuming updateCard updates the user's avatar in Supabase
+
           if (supabaseResponse) {
             console.log("Profile image updated successfully in Supabase");
           }
@@ -90,71 +108,71 @@ const Page = () => {
   };
 
   return (
-    <GestureHandlerRootView style={{ height: '100%',backgroundColor:'white' }}>
-    <ScrollView style={styles.container}>
-      {/* Top Section */}
-      <View style={styles.profileHeader}>
-        {/* Profile Image */}
-        <TouchableOpacity onPress={onCaptureImage}>
-          <Image
-            source={{
-              uri: user?.externalAccounts[0]?.imageUrl ?? user?.imageUrl,
-            }}
-            style={styles.profileImage}
-          />
-        </TouchableOpacity>
+    <GestureHandlerRootView style={{ height: '100%', backgroundColor: 'white' }}>
+      <ScrollView style={styles.container}>
+        {/* Top Section */}
+        <View style={styles.profileHeader}>
+          {/* Profile Image */}
+          <TouchableOpacity onPress={onCaptureImage}>
+            <Image
+              source={{
+                uri: user?.externalAccounts[0]?.imageUrl ?? user?.imageUrl,
+              }}
+              style={styles.profileImage}
+            />
+          </TouchableOpacity>
 
-        {/* User Info */}
-        <View style={styles.userInfo}>
-          <Text style={styles.nameText}>
-            {firstName} {lastName}
+          {/* User Info */}
+          <View style={styles.userInfo}>
+            <Text style={styles.nameText}>
+              {firstName} {lastName}
+            </Text>
+            <Text style={styles.usernameText}>@{userName}</Text>
+          </View>
+        </View>
+
+        {/* Stats Section */}
+        <View style={styles.statsContainer}>
+          <View style={styles.statBox}>
+            <Text style={styles.statNumber}>{followingCount}</Text>
+            <Text style={styles.statLabel}>takip</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statNumber}>{followerCount}</Text>
+            <Text style={styles.statLabel}>takipçi</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statNumber}>0</Text>
+            <Text style={styles.statLabel}>Başarımlar</Text>
+          </View>
+        </View>
+
+        {/* Action Buttons */}
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity style={styles.editProfileButton}>
+            <Text style={styles.buttonText}>Profili Düzenle</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.messageButton}
+            onPress={() => { signOut().then(() => { router.push('/(auth)/sign-in') }) }}
+          >
+            <Text style={styles.buttonText}>Çıkış Yap</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Additional Info */}
+        <View style={styles.additionalInfo}>
+          <Text style={{ fontSize: 24, fontWeight: '600', marginBottom: 10 }}>Hakkımda</Text>
+          <Text style={styles.bioText}>
+            Ben {firstName} merhabalar react native developer'ım Hakkımda kısmına mesaj yazmaktayım
           </Text>
-          <Text style={styles.usernameText}>@{userName}</Text>
         </View>
-      </View>
 
-      {/* Stats Section */}
-      <View style={styles.statsContainer}>
-        <View style={styles.statBox}>
-          <Text style={styles.statNumber}>0</Text>
-          <Text style={styles.statLabel}>takip</Text>
+        <View style={styles.additionalInfo}>
+          <Text style={{ fontSize: 24, fontWeight: '600', marginBottom: 10 }}>Abonelere Özel</Text>
         </View>
-        <View style={styles.statBox}>
-          <Text style={styles.statNumber}>0</Text>
-          <Text style={styles.statLabel}>takipçi</Text>
-        </View>
-        <View style={styles.statBox}>
-          <Text style={styles.statNumber}>0</Text>
-          <Text style={styles.statLabel}>Başarımlar</Text>
-        </View>
-      </View>
+      </ScrollView>
 
-      {/* Action Buttons */}
-      <View style={styles.actionsContainer}>
-        <TouchableOpacity style={styles.editProfileButton}>
-          <Text style={styles.buttonText}>Profili Düzenle</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.messageButton}
-        onPress={() => {signOut().then(()=> {router.push('/(auth)/sign-in')})}}
-        >
-          <Text style={styles.buttonText}>Çıkış Yap</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Additional Info */}
-      <View style={styles.additionalInfo}>
-        <Text style={{fontSize:24,fontWeight:'600',marginBottom:10}}>Hakkımda</Text>
-        <Text style={styles.bioText}>
-          Ben {firstName} merhabalar react native developer'ım Hakkımda kısmına mesaj yazmaktayım
-        </Text>
-      </View>
-
-      <View style={styles.additionalInfo}>
-      <Text style={{fontSize:24,fontWeight:'600',marginBottom:10}}>Abonelere Özel</Text>
-      </View>
-    </ScrollView>
-
-        {/* Bu alan alt sheet kısmıdır */}
+      {/* Bu alan alt sheet kısmıdır */}
       <BottomSheet
         ref={bottomSheetRef}
         index={1}
@@ -165,15 +183,15 @@ const Page = () => {
         }}
         backgroundStyle={{
           backgroundColor: '#1E201E',  // Change this color to what you need
-          borderTopRightRadius:50,
-          borderTopLeftRadius:50,
+          borderTopRightRadius: 50,
+          borderTopLeftRadius: 50,
         }}
         handleStyle={{
           backgroundColor: 'transparent',
           height: 50,
         }}
       >
-        <BottomSheetView style={{ flex: 1,backgroundColor:'#1E201E'}}>
+        <BottomSheetView style={{ flex: 1, backgroundColor: '#1E201E' }}>
           <View>
 
           </View>
@@ -218,13 +236,13 @@ const styles = StyleSheet.create({
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems:'center',
+    alignItems: 'center',
     marginVertical: 20,
   },
   statBox: {
     alignItems: 'center',
-    marginHorizontal:20,
-    width:90
+    marginHorizontal: 20,
+    width: 90
   },
   statNumber: {
     fontSize: 24,
@@ -239,7 +257,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginVertical: 20,
-    paddingHorizontal:10
+    paddingHorizontal: 10
   },
   editProfileButton: {
     backgroundColor: '#FABC3F',
@@ -264,7 +282,7 @@ const styles = StyleSheet.create({
   },
   additionalInfo: {
     marginTop: 20,
-    padding:12
+    padding: 12
   },
   bioText: {
     fontSize: 16,

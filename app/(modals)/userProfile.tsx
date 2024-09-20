@@ -127,7 +127,7 @@ const Page = () => {
             <Text style={styles.statLabel}>takip</Text>
           </View>
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>dnjnss</Text>
+            <Text style={styles.statNumber}>{followingCount}</Text>
             <Text style={styles.statLabel}>takipçi</Text>
           </View>
           <View style={styles.statBox}>

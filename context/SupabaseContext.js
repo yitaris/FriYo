@@ -584,28 +584,32 @@ export const SupabaseProvider = ({ children }) => {
     return data;
   };
 
-
-  const fetchFollowData = async (followerId) => {
+  const fetchFollowData = async (userId) => {
     try {
+      // Assuming you're querying a database or API for follow data
       const { data, error } = await client
-        .from(USERS_TABLE)
-        .select('followers') // 'followers' alanını seçiyoruz
-        .eq('id', followerId);   // İlgili kullanıcının ID'sine göre sorgu yapıyoruz
+        .from("users")
+        .select("followers, following")
+        .eq("id", userId);
 
       if (error) {
-        console.error('Error fetching followers:', error);
-        return [];
+        console.error("Error fetching follow data:", error);
+        return { followers: [], following: [] }; // Return empty arrays in case of an error
       }
 
-      // Takipçilerin listesini döndür
-      return data?.[0]?.followers || [];
+      if (data && data.length > 0) {
+        return {
+          followers: data[0].followers || [], // Ensure followers is an array
+          following: data[0].following || [], // Ensure following is an array
+        };
+      }
+
+      return { followers: [], following: [] }; // Default to empty arrays if no data found
     } catch (err) {
-      console.error('Error getting followers:', err);
-      return [];
+      console.error("Error in fetchFollowData:", err);
+      return { followers: [], following: [] }; // Return empty arrays in case of any error
     }
   };
-
-
 
 
   const value = {
@@ -634,7 +638,7 @@ export const SupabaseProvider = ({ children }) => {
     updateUsers,
     fetchUsersData,
     //takipçileri yönet
-    followUser, unfollowUser, getFollowers, getFollowing,fetchFollowData,
+    followUser, unfollowUser, getFollowers, getFollowing, fetchFollowData,
     //Bildirimleri yönet
     setNotifications, fetchNotifications, deleteNotifications, showNotifications, resendNotifications
   };

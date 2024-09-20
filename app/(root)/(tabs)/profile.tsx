@@ -107,68 +107,47 @@ const Page = () => {
     }
   };
 
+  const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+  };
+
   return (
     <GestureHandlerRootView style={{ height: '100%', backgroundColor: 'white' }}>
       <ScrollView style={styles.container}>
-        {/* Top Section */}
-        <View style={styles.profileHeader}>
-          {/* Profile Image */}
-          <TouchableOpacity onPress={onCaptureImage}>
-            <Image
-              source={{
-                uri: user?.externalAccounts[0]?.imageUrl ?? user?.imageUrl,
-              }}
-              style={styles.profileImage}
-            />
-          </TouchableOpacity>
 
-          {/* User Info */}
-          <View style={styles.userInfo}>
+
+        <View style={styles.profileHeader}>
+          <View>
+            <Text style={styles.statNumber}>{followerCount}</Text>
+            <Text style={styles.statLabel}>Takip</Text>
+          </View>
+          <View>
+            <TouchableOpacity onPress={onCaptureImage}>
+              <Image
+                source={{
+                  uri: user?.externalAccounts[0]?.imageUrl ?? user?.imageUrl,
+                }}
+                style={styles.profileImage}
+              />
+            </TouchableOpacity>
             <Text style={styles.nameText}>
-              {firstName} {lastName}
+              {capitalizeFirstLetter(firstName)} {capitalizeFirstLetter(lastName)}
             </Text>
             <Text style={styles.usernameText}>@{userName}</Text>
+
+          </View>
+          <View>
+            <Text style={styles.statNumber}>{followingCount}</Text>
+            <Text style={styles.statLabel}>Takip</Text>
           </View>
         </View>
 
-        {/* Stats Section */}
-        <View style={styles.statsContainer}>
-          <View style={styles.statBox}>
-            <Text style={styles.statNumber}>{followingCount}</Text>
-            <Text style={styles.statLabel}>takip</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statNumber}>{followerCount}</Text>
-            <Text style={styles.statLabel}>takipçi</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statNumber}>0</Text>
-            <Text style={styles.statLabel}>Başarımlar</Text>
-          </View>
-        </View>
 
         {/* Action Buttons */}
         <View style={styles.actionsContainer}>
           <TouchableOpacity style={styles.editProfileButton}>
             <Text style={styles.buttonText}>Profili Düzenle</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.messageButton}
-            onPress={() => { signOut().then(() => { router.push('/(auth)/sign-in') }) }}
-          >
-            <Text style={styles.buttonText}>Çıkış Yap</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Additional Info */}
-        <View style={styles.additionalInfo}>
-          <Text style={{ fontSize: 24, fontWeight: '600', marginBottom: 10 }}>Hakkımda</Text>
-          <Text style={styles.bioText}>
-            Ben {firstName} merhabalar react native developer'ım Hakkımda kısmına mesaj yazmaktayım
-          </Text>
-        </View>
-
-        <View style={styles.additionalInfo}>
-          <Text style={{ fontSize: 24, fontWeight: '600', marginBottom: 10 }}>Abonelere Özel</Text>
         </View>
       </ScrollView>
 
@@ -197,7 +176,7 @@ const Page = () => {
           </View>
         </BottomSheetView>
       </BottomSheet>
-    </GestureHandlerRootView>
+    </GestureHandlerRootView >
   );
 };
 
@@ -207,33 +186,34 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    padding: 20,
   },
   profileHeader: {
     flexDirection: 'row',
+    justifyContent: 'space-around',
     alignItems: 'center',
     marginBottom: 20,
   },
   profileImage: {
-    width: 85,
-    height: 85,
-    borderRadius: 42.5,
+    width: 120,
+    height: 120,
+    borderRadius: 100,
     borderWidth: 2,
     borderColor: '#FABC3F',
   },
-  userInfo: {
-    marginLeft: 20,
-  },
   nameText: {
-    fontSize: 28,
+    marginTop: 10,
+    textAlign: 'center',
+    fontSize: 20,
     fontWeight: '600',
     color: '#1E201E',
   },
   usernameText: {
-    fontSize: 16,
-    color: 'grey',
+    fontSize: 15,
+    textAlign: 'center',
+    color: '#a9a9a9s',
   },
   statsContainer: {
+    borderWidth: 1,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
@@ -245,13 +225,14 @@ const styles = StyleSheet.create({
     width: 90
   },
   statNumber: {
-    fontSize: 24,
-    fontWeight: '400',
+    textAlign: 'center',
+    fontSize: 19,
+    fontWeight: '800',
     color: '#1E201E',
   },
   statLabel: {
     fontSize: 14,
-    color: 'grey',
+    color: 'gray',
   },
   actionsContainer: {
     flexDirection: 'row',
@@ -260,19 +241,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10
   },
   editProfileButton: {
-    backgroundColor: '#FABC3F',
-    padding: 10,
-    borderRadius: 8,
-    width: '45%',
+    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+    borderRadius: 100,
+    width: '48%',
     alignItems: 'center',
   },
   messageButton: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#FABC3F',
-    padding: 10,
-    borderRadius: 8,
-    width: '45%',
+    backgroundColor: '#FABC3F',
+    paddingHorizontal: 30,
+    borderRadius: 100,
+    paddingVertical: 15,
+    width: '48%',
     alignItems: 'center',
   },
   buttonText: {

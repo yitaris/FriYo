@@ -98,41 +98,36 @@ const Page = () => {
     return <Text>User not found</Text>;
   }
 
+
+  const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+  };
+
   return (
     <GestureHandlerRootView style={{ height: "100%", backgroundColor: "white" }}>
       <ScrollView style={styles.container}>
-        {/* Top Section */}
-        <View style={styles.profileHeader}>
-          {/* Profile Image */}
-          <Image
-            source={{
-              uri: userData.avatar_url,
-            }}
-            style={styles.profileImage}
-          />
 
-          {/* User Info */}
-          <View style={styles.userInfo}>
+        <View style={styles.profileHeader}>
+          <View>
+            <Text style={styles.statNumber}>{followerCount}</Text>
+            <Text style={styles.statLabel}>Takip</Text>
+          </View>
+          <View>
+            <Image
+              source={{
+                uri: userData.avatar_url,
+              }}
+              style={styles.profileImage}
+            />
             <Text style={styles.nameText}>
-              {userData.first_name} {userData.last_name}
+              {capitalizeFirstLetter(userData.first_name)} {capitalizeFirstLetter(userData.last_name)}
             </Text>
             <Text style={styles.usernameText}>@{userData.username}</Text>
-          </View>
-        </View>
 
-        {/* Stats Section */}
-        <View style={styles.statsContainer}>
-          <View style={styles.statBox}>
-            <Text style={styles.statNumber}>{followerCount}</Text>
-            <Text style={styles.statLabel}>takip</Text>
           </View>
-          <View style={styles.statBox}>
+          <View>
             <Text style={styles.statNumber}>{followingCount}</Text>
-            <Text style={styles.statLabel}>takipçi</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statNumber}>0</Text>
-            <Text style={styles.statLabel}>Başarımlar</Text>
+            <Text style={styles.statLabel}>Takip</Text>
           </View>
         </View>
 
@@ -150,17 +145,6 @@ const Page = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Additional Info */}
-        <View style={styles.additionalInfo}>
-          <Text style={{ fontSize: 24, fontWeight: "600", marginBottom: 10 }}>Hakkımda</Text>
-          <Text style={styles.bioText}>
-            Ben {userData.username} merhabalar react native developer'ım Hakkımda kısmına mesaj yazmaktayım
-          </Text>
-        </View>
-
-        <View style={styles.additionalInfo}>
-          <Text style={{ fontSize: 24, fontWeight: "600", marginBottom: 10 }}>Abonelere Özel</Text>
-        </View>
       </ScrollView>
 
       {/* Bottom Sheet */}
@@ -199,48 +183,51 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   profileHeader: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
     marginBottom: 20,
   },
   profileImage: {
-    width: 85,
-    height: 85,
-    borderRadius: 42.5,
+    width: 120,
+    height: 120,
+    borderRadius: 100,
     borderWidth: 2,
-    borderColor: "#FABC3F",
-  },
-  userInfo: {
-    marginLeft: 20,
+    borderColor: '#FABC3F',
   },
   nameText: {
-    fontSize: 28,
-    fontWeight: "600",
-    color: "#1E201E",
+    marginTop: 10,
+    textAlign: 'center',
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#1E201E',
   },
   usernameText: {
-    fontSize: 16,
-    color: "grey",
+    fontSize: 15,
+    textAlign: 'center',
+    color: '#a9a9a9s',
   },
   statsContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginVertical: 20,
   },
   statBox: {
-    alignItems: "center",
+    alignItems: 'center',
     marginHorizontal: 20,
-    width: 90,
+    width: 90
   },
   statNumber: {
-    fontSize: 24,
-    fontWeight: "600",
-    color: "#1E201E",
+    textAlign: 'center',
+    fontSize: 19,
+    fontWeight: '800',
+    color: '#1E201E',
   },
   statLabel: {
     fontSize: 14,
-    color: "grey",
+    color: 'gray',
   },
   actionsContainer: {
     flexDirection: "row",

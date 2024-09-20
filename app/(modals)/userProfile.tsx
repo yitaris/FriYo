@@ -14,18 +14,22 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { useLocalSearchParams } from "expo-router";
 import { useSupabase } from "@/context/SupabaseContext"; // Supabase bağlamını içe aktar
 import { useUser } from "@clerk/clerk-expo";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 const Page = () => {
   const snapPoints = useMemo(() => ["20", "50%", "90%"], []);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const ownUser = useUser();
   const { userId } = useLocalSearchParams();
-  const { fetchUsersData, setNotifications, deleteNotifications, unfollowUser } = useSupabase();
+  const { fetchUsersData, setNotifications, deleteNotifications, unfollowUser, fetchFollowData } = useSupabase();
   const [userData, setUserData] = useState(null); // State to store user data
   const [loading, setLoading] = useState(true); // Loading state
   const [buttonText, setButtonText] = useState("");
   const [isRequestSent, setIsRequestSent] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+
 
   const handleFollow = async (followerId, followingId, profilePicture, username) => {
     if (isFollowing) {
@@ -52,6 +56,22 @@ const Page = () => {
       if (userId) {
         setLoading(true);
         const data = await fetchUsersData(userId);
+        const fetchFollowCounts = async () => {
+          try {
+            if (userId) {
+              // Takipçi ve takip edilen verilerini çek
+              const followData = await fetchFollowData(userId);
+
+              if (followData) {
+                setFollowerCount(followData.followers.length); // Takipçi sayısını ayarla
+                setFollowingCount(followData.following.length); // Takip edilen sayısını ayarla
+              }
+            }
+          } catch (error) {
+            console.error("Error fetching follow data:", error);
+          }
+        };
+        fetchFollowCounts();
         if (data) {
           setUserData(data[0]); // Assuming you return an array
           // Check if your ID is in the following list
@@ -63,7 +83,6 @@ const Page = () => {
         setLoading(false);
       }
     };
-
     getUserData();
   }, [userId]);
 
@@ -104,11 +123,11 @@ const Page = () => {
         {/* Stats Section */}
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>0</Text>
+            <Text style={styles.statNumber}>{followerCount}</Text>
             <Text style={styles.statLabel}>takip</Text>
           </View>
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>0</Text>
+            <Text style={styles.statNumber}>dnjnss</Text>
             <Text style={styles.statLabel}>takipçi</Text>
           </View>
           <View style={styles.statBox}>

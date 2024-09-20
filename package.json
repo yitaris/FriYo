@@ -63,7 +63,8 @@
     "reanimated-bottom-sheet": "^1.0.0-alpha.22",
     "stripe": "^16.9.0",
     "zeego": "^1.10.0",
-    "zustand": "^4.5.4"
+    "zustand": "^4.5.4",
+    "expo-linear-gradient": "~13.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

@@ -14,6 +14,7 @@ import { icons, images } from "@/constants";
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { useSupabase } from "@/context/SupabaseContext";
+import { LinearGradient } from 'expo-linear-gradient';
 
 const Page = () => {
   const { updateCard, fetchFollowData } = useSupabase();
@@ -114,8 +115,6 @@ const Page = () => {
   return (
     <GestureHandlerRootView style={{ height: '100%', backgroundColor: 'white' }}>
       <ScrollView style={styles.container}>
-
-
         <View style={styles.profileHeader}>
           <View>
             <Text style={styles.statNumber}>{followerCount}</Text>
@@ -142,7 +141,15 @@ const Page = () => {
           </View>
         </View>
 
-
+        <Text style={{ width: '95%', alignSelf: 'center' }}>
+          "Dursun iyi misun?"
+          Dursun aşağıdan cevap vermiş:
+          "İyiyim Temel, bir şeyim yok!"
+          Temel:
+          "Yahu nasıl bir şeyun yok, aşağıya düştun!"
+          Dursun:
+          "He Temel, düştim ama henüz yere değmedim!"
+        </Text>
         {/* Action Buttons */}
         <View style={styles.actionsContainer}>
           <TouchableOpacity style={styles.editProfileButton}>

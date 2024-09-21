@@ -42,6 +42,7 @@ import notificationIcon from '@/assets/icons/notificationIcon.png';
 import addFriendIcon from '@/assets/icons/addFriendIcon.png';
 import settingWhiteIcon from '@/assets/icons/settingWhiteIcon.png';
 import editIcon from '@/assets/icons/editIcon.png'
+import plusIcon from '@/assets/icons/plusIcon.png'
 
 export const images = {
     onboarding4,
@@ -90,7 +91,8 @@ export const icons = {
     notificationIcon,
     addFriendIcon,
     settingWhiteIcon,
-    editIcon
+    editIcon,
+    plusIcon,
 };
 
 export const onboarding = [

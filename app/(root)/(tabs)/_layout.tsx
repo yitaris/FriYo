@@ -121,17 +121,39 @@ const Layout = () => (
       }}
     />
     <Tabs.Screen
-      name="chat"
-      options={{
-        title: "Chat",
-        headerShown: false,
-        tabBarIcon: ({ focused }) => <TabIcon focused={focused} source={icons.chat} />,
-      }}
-    />
+  name="chat"
+  options={{
+    title: "Post",
+    headerTitleStyle:{color:'white'},
+    headerShown: true,
+    headerStyle: {
+      backgroundColor: '#151515', // Header arkaplan rengi
+    },
+    headerShadowVisible: false, // Header gölgesini kaldırır
+    tabBarIcon: ({ focused }) => <TabIcon focused={focused} source={icons.chat} />,
+    headerLeft: () => {
+      const router = useRouter();
+      return (
+        <View>
+          <TouchableOpacity
+            onPress={() => { router.push('/(root)/(tabs)/home') }}
+            style={{ padding: 12 }}
+          >
+            <Image
+              source={icons.arrowLeft}
+              style={{ width: 50, height: 50 }}
+            />
+          </TouchableOpacity>
+        </View>
+      );
+    },
+  }}
+/>
     <Tabs.Screen
       name="profile"
       options={{
         title: "Profile",
+        headerShadowVisible: false, // Header gölgesini kaldırır
         headerTitleAlign: 'center', // Başlığı ortalar
         headerTitleStyle: {
           fontSize: 18,

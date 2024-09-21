@@ -4,6 +4,7 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
+  ActivityIndicator
 } from "react-native";
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useAuth, useUser } from "@clerk/clerk-expo";
@@ -14,11 +15,11 @@ import { icons, images } from "@/constants";
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { useSupabase } from "@/context/SupabaseContext";
-import { LinearGradient } from 'expo-linear-gradient';
+import * as FileSystem from 'expo-file-system';
 
 const Page = () => {
-  const { updateCard, fetchFollowData } = useSupabase();
-  const snapPoints = useMemo(() => ['20', '50%', '90%'], [])
+  const { updateCard, fetchFollowData,getUserImages ,addPosts} = useSupabase();
+  const snapPoints = useMemo(() => ['15%', '50%', '90%'], [])
   const bottomSheetRef = useRef<BottomSheet>(null);
   const { user } = useUser();
   const { signOut } = useAuth();
@@ -29,7 +30,8 @@ const Page = () => {
   const [email, setEmail] = useState(
     user?.emailAddresses[0].emailAddress ?? ""
   );
-
+  const [userImage,setUserImage] = useState([]);
+  const [loading,setLoading] = useState(false)
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
 
@@ -38,12 +40,13 @@ const Page = () => {
     setUserName(user?.username ?? "");
     setFirstName(user?.firstName ?? "");
     setLastName(user?.lastName ?? "");
-    setEmail(user?.emailAddresses[0].emailAddress ?? "");
+    setEmail(user?.emailAddresses[0]?.emailAddress ?? "");
+  
     const fetchFollowCounts = async () => {
       try {
         if (user?.id) {
           const followData = await fetchFollowData(user?.id);
-
+  
           if (followData) {
             setFollowerCount(followData.followers.length); // Takipçi sayısını ayarla
             setFollowingCount(followData.following.length); // Takip edilen sayısını ayarla
@@ -53,8 +56,51 @@ const Page = () => {
         console.error("Error fetching follow data:", error);
       }
     };
+  
+    
+  
     fetchFollowCounts();
-  }, [user]);
+    fetchUserImages(); // Kullanıcı resimlerini component mount olduğunda getir
+  
+  }, [user]); // 'user' değiştiğinde veya sayfaya döndüğünüzde bu kod çalışacak
+
+  const fetchUserImages = async () => {
+    setLoading(true);
+    try {
+      const imageUrls = await getUserImages(user?.id); // Kullanıcı resimlerini al
+      setUserImage(imageUrls); // Resimleri state'e kaydet
+    } catch (error) {
+      console.error('Error fetching images:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onSelectImage = async () => {
+    setLoading(true); // Yüklemeye başlarken loading state true
+    try {
+      const options = {
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+      };
+
+      const result = await ImagePicker.launchImageLibraryAsync(options);
+
+      if (!result.canceled) {
+        const img = result.assets[0];
+        const base64 = await FileSystem.readAsStringAsync(img.uri, { encoding: 'base64' });
+        const filePath = `${user?.id}/${new Date().getTime()}.${img.type === 'image' ? 'png' : 'mp4'}`;
+        const contentType = img.type === 'image' ? 'image/png' : 'video/mp4';
+        
+        await addPosts(filePath, base64, contentType);
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    } finally {
+      setLoading(false); // İşlem tamamlandığında loading state false
+      fetchUserImages()
+    }
+  };
 
   const onCaptureImage = async () => {
     // İzinleri kontrol et
@@ -178,9 +224,70 @@ const Page = () => {
         }}
       >
         <BottomSheetView style={{ flex: 1, backgroundColor: '#1E201E' }}>
-          <View>
-
+          <View style={{flexDirection:'row',alignItems:'baseline',justifyContent:'center',height:70}}>
+            <TouchableOpacity style={{marginRight:10,backgroundColor:'#FABC3F',padding:10,width:'25%',borderRadius:'10'}}>
+              <Text style={{textAlign:'center',fontSize:15,fontWeight:'500'}}>Posts</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={{marginRight:10,backgroundColor:'#FABC3F',padding:10,width:'30%',borderRadius:'10'}}>
+              <Text style={{textAlign:'center',fontSize:15,fontWeight:'500'}}>Ücretli içerik</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={{marginRight:10,backgroundColor:'#FABC3F',padding:10,width:'25%',borderRadius:'10'}}>
+              <Text style={{textAlign:'center',fontSize:15,fontWeight:'500'}}>Reels</Text>
+            </TouchableOpacity>
           </View>
+          <ScrollView>
+              {/* Yükleniyor simgesi */}
+              {loading && <ActivityIndicator size="large" color="#FABC3F" />}
+
+              {/* Yüklenen resimleri göster */}
+              {!loading && userImage.length > 0 && (
+                <View style={{ 
+                  flexDirection: 'row', 
+                  flexWrap: 'wrap', // Satırın taşması durumunda alt satıra geçmesini sağlar
+                  justifyContent: 'flex-start' // Resimler sola hizalanacak
+                }}>
+                  {userImage.map((imageUrl, index) => (
+                    <View key={index} style={{ 
+                      width: '30%', // Ekranın %30'unu kaplar (3 tane sığdırmak için)
+                      marginBottom: 10, // Altına boşluk bırakır
+                      marginHorizontal: 5
+                    }}>
+                      <Image
+                        source={{ uri: imageUrl }}
+                        style={{
+                          width: '100%', // Kapladığı alanı tamamen doldurur
+                          height: 115, // Her resmin yüksekliği
+                          borderRadius: 10,
+                        }}
+                        resizeMode="cover"
+                      />
+                    </View>
+                  ))}
+                  <TouchableOpacity
+                   style={{
+                    opacity:0.5,
+                    borderWidth:0.5,
+                    borderColor:'#FABC3F',
+                    width:'30%',height:115,borderRadius:10,marginHorizontal:5,alignItems:'center',justifyContent:'center'
+                    }}
+                    onPress={onSelectImage}
+                    >
+                    <Image
+                    source={icons.plusIcon}
+                    style={{width:50,height:50,opacity:0.5}}
+                    />
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {/* Eğer resim yoksa mesaj göster */}
+              {!loading && userImage.length === 0 && (
+                <Text style={{ textAlign: 'center', color: 'white', marginTop: 20 }}>
+                  Henüz resim yüklenmedi.
+                </Text>
+              )}
+            </ScrollView>
+
         </BottomSheetView>
       </BottomSheet>
     </GestureHandlerRootView >

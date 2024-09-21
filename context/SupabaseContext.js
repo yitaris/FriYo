@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect } from 'react';
 import { client } from '@/utils/supabaseClient';
 import { useAuth } from '@clerk/clerk-expo';
-
+import { decode } from 'base64-arraybuffer';
 // Tablo ve bucket isimleri
 export const BOARDS_TABLE = 'boards';
 export const USER_BOARDS_TABLE = 'user_boards';
@@ -42,121 +42,6 @@ export const SupabaseProvider = ({ children }) => {
     });
 
     client.realtime.setAuth(clerkToken);
-  };
-
-  const createBoard = async (title, background) => {
-    const { data, error } = await client
-      .from(BOARDS_TABLE)
-      .insert({ title, creator: userId, background });
-
-    if (error) {
-      console.error('Error creating board:', error);
-    }
-
-    return data;
-  };
-
-  const getBoards = async () => {
-    const { data } = await client
-      .from(USER_BOARDS_TABLE)
-      .select(`boards ( title, id, background )`)
-      .eq('user_id', userId);
-    const boards = data?.map(b => b.boards);
-
-    return boards || [];
-  };
-
-  const getBoardInfo = async (boardId) => {
-    const { data } = await client
-      .from(BOARDS_TABLE)
-      .select(`*, users (first_name)`)
-      .match({ id: boardId })
-      .single();
-    return data;
-  };
-
-  const updateBoard = async (board) => {
-    const { data } = await client
-      .from(BOARDS_TABLE)
-      .update({ title: board.title })
-      .match({ id: board.id })
-      .select('*')
-      .single();
-
-    return data;
-  };
-
-  const deleteBoard = async (id) => {
-    return await client.from(BOARDS_TABLE).delete().match({ id });
-  };
-
-  // CRUD Lists
-  const getBoardLists = async (boardId) => {
-    const lists = await client
-      .from(LISTS_TABLE)
-      .select('*')
-      .eq('board_id', boardId)
-      .order('position');
-
-    return lists.data || [];
-  };
-
-  const addBoardList = async (boardId, title, position = 0) => {
-    return await client
-      .from(LISTS_TABLE)
-      .insert({ board_id: boardId, position, title })
-      .select('*')
-      .single();
-  };
-
-  const updateBoardList = async (list, newname) => {
-    return await client
-      .from(LISTS_TABLE)
-      .update({
-        title: newname,
-      })
-      .match({ id: list.id })
-      .select('*')
-      .single();
-  };
-
-  const deleteBoardList = async (id) => {
-    return await client.from(LISTS_TABLE).delete().match({ id });
-  };
-
-  // CRUD Cards
-  const addListCard = async (listId, boardId, title, position = 0, image_url = null) => {
-    return await client
-      .from(CARDS_TABLE)
-      .insert({ board_id: boardId, list_id: listId, title, position, image_url })
-      .select('*')
-      .single();
-  };
-
-  const getListCards = async (listId) => {
-    const lists = await client
-      .from(CARDS_TABLE)
-      .select('*')
-      .eq('list_id', listId)
-      .eq('done', false)
-      .order('position');
-
-    return lists.data || [];
-  };
-
-  const updateCard = async (profileUrl, id) => {
-    const { data, error } = await client
-      .from(USERS_TABLE) // Assuming you're updating in the USERS_TABLE
-      .update({
-        avatar_url: profileUrl, // Update the avatar_url field with the new image URL
-      })
-      .match({ id: id }); // Update the specific user based on their userId
-
-    if (error) {
-      console.error("Error updating avatar_url in Supabase:", error);
-    }
-
-    return data;
   };
 
   // Follow a user
@@ -447,9 +332,6 @@ export const SupabaseProvider = ({ children }) => {
     }
   };
 
-
-
-
   // Get followers of a user
   const getFollowers = async (userId) => {
     const { data, error } = await client
@@ -476,28 +358,6 @@ export const SupabaseProvider = ({ children }) => {
     }
 
     return data?.[0]?.following || [];
-  };
-
-  const assignCard = async (cardId, userId) => {
-    return await client
-      .from(CARDS_TABLE)
-      .update({ assigned_to: userId })
-      .match({ id: cardId })
-      .select('*, users (first_name, email, avatar_url)')
-      .single();
-  };
-
-  const deleteCard = async (id) => {
-    return await client.from(CARDS_TABLE).delete().match({ id });
-  };
-
-  const getCardInfo = async (id) => {
-    const { data } = await client
-      .from(CARDS_TABLE)
-      .select(`*, users (*), boards(*)`)
-      .match({ id })
-      .single();
-    return data;
   };
 
   const findUsers = async (search) => {
@@ -532,23 +392,6 @@ export const SupabaseProvider = ({ children }) => {
     return null; // Return null if no data found
   };
 
-  const addUserToBoard = async (boardId, userId) => {
-    return await client.from(USER_BOARDS_TABLE).insert({
-      user_id: userId,
-      board_id: boardId,
-    });
-  };
-
-  const getBoardMember = async (boardId) => {
-    const { data } = await client
-      .from(USER_BOARDS_TABLE)
-      .select('users(*)')
-      .eq('board_id', boardId);
-
-    const members = data?.map(b => b.users);
-    return members;
-  };
-
   const getRealtimeCardSubscription = (id, handleRealtimeChanges) => {
     console.log('Creating a realtime connection...');
 
@@ -570,18 +413,6 @@ export const SupabaseProvider = ({ children }) => {
       },
     });
     return data?.signedUrl;
-  };
-
-  const setUserPushToken = async (token) => {
-    const { data, error } = await client
-      .from(USERS_TABLE)
-      .upsert({ id: userId, push_token: token });
-
-    if (error) {
-      console.error('Error setting push token:', error);
-    }
-
-    return data;
   };
 
   const fetchFollowData = async (userId) => {
@@ -610,33 +441,50 @@ export const SupabaseProvider = ({ children }) => {
       return { followers: [], following: [] }; // Return empty arrays in case of any error
     }
   };
-
-
+  const addPosts = async (filePath,base64,contentType) => {
+    try {
+      const { data, error } = await client.storage
+        .from('files')
+        .upload(filePath, decode(base64), { contentType });
+  
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      console.error("Error in addPosts:", err);
+    }
+  };
+  
+  const getUserImages = async (userId) => {
+    try {
+      // Kullanıcının klasöründe bulunan dosyaları listele
+      const { data, error } = await client.storage
+        .from('files')
+        .list(userId, {
+          limit: 100, // Bir seferde getirilecek maksimum dosya sayısı
+          offset: 0,  // Başlangıç noktası
+        });
+  
+      if (error) throw error;
+  
+      // Dosya URL'lerini oluştur
+      const imageUrls = data.map((file) => {
+        return client.storage.from('files').getPublicUrl(`${userId}/${file.name}`).data.publicUrl;
+      });
+  
+      return imageUrls; // Resim URL'lerini döndür
+    } catch (err) {
+      console.error("Error in getUserImages:", err);
+    }
+  };
   const value = {
     userId,
-    createBoard,
-    getBoards,
-    getBoardInfo,
-    updateBoard,
-    deleteBoard,
-    getBoardLists,
-    addBoardList,
-    updateBoardList,
-    deleteBoardList,
-    getListCards,
-    addListCard,
-    updateCard,
-    assignCard,
-    deleteCard,
-    getCardInfo,
     findUsers,
-    addUserToBoard,
-    getBoardMember,
     getRealtimeCardSubscription,
     getFileFromPath,
-    setUserPushToken,
     updateUsers,
     fetchUsersData,
+    addPosts,
+    getUserImages,
     //takipçileri yönet
     followUser, unfollowUser, getFollowers, getFollowing, fetchFollowData,
     //Bildirimleri yönet

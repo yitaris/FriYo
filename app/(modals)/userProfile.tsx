@@ -14,14 +14,14 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { useLocalSearchParams } from "expo-router";
 import { useSupabase } from "@/context/SupabaseContext"; // Supabase bağlamını içe aktar
 import { useUser } from "@clerk/clerk-expo";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { client } from "@/utils/supabaseClient"
 
 const Page = () => {
   const snapPoints = useMemo(() => ["20", "50%", "90%"], []);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const ownUser = useUser();
   const { userId } = useLocalSearchParams();
-  const { fetchUsersData, setNotifications, deleteNotifications, unfollowUser, fetchFollowData } = useSupabase();
+  const { fetchUsersData, setNotifications, deleteNotifications, unfollowUser, fetchFollowData,getUserImages } = useSupabase();
   const [userData, setUserData] = useState(null); // State to store user data
   const [loading, setLoading] = useState(true); // Loading state
   const [buttonText, setButtonText] = useState("");
@@ -29,7 +29,7 @@ const Page = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
-
+  const [userImage,setUserImage] = useState([]);
 
   const handleFollow = async (followerId, followingId, profilePicture, username) => {
     if (isFollowing) {
@@ -84,7 +84,20 @@ const Page = () => {
       }
     };
     getUserData();
+    fetchUserImages();
   }, [userId]);
+
+  const fetchUserImages = async () => {
+    setLoading(true);
+    try {
+      const imageUrls = await getUserImages(userId); // Kullanıcı resimlerini al
+      setUserImage(imageUrls); // Resimleri state'e kaydet
+    } catch (error) {
+      console.error('Error fetching images:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -167,7 +180,55 @@ const Page = () => {
         }}
       >
         <BottomSheetView style={{ flex: 1, backgroundColor: "#1E201E" }}>
-          <View></View>
+        <View style={{flexDirection:'row',alignItems:'baseline',justifyContent:'center',height:70}}>
+            <TouchableOpacity style={{marginRight:10,backgroundColor:'#FABC3F',padding:10,width:'25%',borderRadius:'10'}}>
+              <Text style={{textAlign:'center',fontSize:15,fontWeight:'500'}}>Posts</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={{marginRight:10,backgroundColor:'#FABC3F',padding:10,width:'30%',borderRadius:'10'}}>
+              <Text style={{textAlign:'center',fontSize:15,fontWeight:'500'}}>Ücretli içerik</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={{marginRight:10,backgroundColor:'#FABC3F',padding:10,width:'25%',borderRadius:'10'}}>
+              <Text style={{textAlign:'center',fontSize:15,fontWeight:'500'}}>Reels</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView style={{}}>
+              {/* Yükleniyor simgesi */}
+              {loading && <ActivityIndicator size="large" color="#FABC3F" />}
+
+              {/* Yüklenen resimleri göster */}
+              {!loading && userImage.length > 0 && (
+                <View style={{ 
+                  flexDirection: 'row', 
+                  flexWrap: 'wrap', // Satırın taşması durumunda alt satıra geçmesini sağlar
+                  justifyContent: 'flex-start' // Resimler sola hizalanacak
+                }}>
+                  {userImage.map((imageUrl, index) => (
+                    <View key={index} style={{ 
+                      width: '30%', // Ekranın %30'unu kaplar (3 tane sığdırmak için)
+                      marginBottom: 10, // Altına boşluk bırakır
+                      marginHorizontal: 5
+                    }}>
+                      <Image
+                        source={{ uri: imageUrl }}
+                        style={{
+                          width: '100%', // Kapladığı alanı tamamen doldurur
+                          height: 115, // Her resmin yüksekliği
+                          borderRadius: 10,
+                        }}
+                        resizeMode="cover"
+                      />
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {/* Eğer resim yoksa mesaj göster */}
+              {!loading && userImage.length === 0 && (
+                <Text style={{ textAlign: 'center', color: 'white', marginTop: 20 }}>
+                  Henüz resim yüklenmedi.
+                </Text>
+              )}
+            </ScrollView>
         </BottomSheetView>
       </BottomSheet>
     </GestureHandlerRootView>

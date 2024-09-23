@@ -6,7 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator
 } from "react-native";
-import React, { useEffect, useState, useMemo, useRef } from "react";
+import React, { useEffect, useState, useMemo, useRef,useCallback } from "react";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Link, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -20,6 +20,8 @@ import * as FileSystem from 'expo-file-system';
 const Page = () => {
   const { updateCard, fetchFollowData,getUserImages ,addPosts} = useSupabase();
   const snapPoints = useMemo(() => ['15%', '50%', '90%'], [])
+   // index'i kontrol edelim
+  const [sheetIndex, setSheetIndex] = useState(0);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const { user } = useUser();
   const { signOut } = useAuth();
@@ -36,7 +38,6 @@ const Page = () => {
   const [followingCount, setFollowingCount] = useState(0);
 
   useEffect(() => {
-    // Diğer kullanıcı bilgilerini güncelle
     setUserName(user?.username ?? "");
     setFirstName(user?.firstName ?? "");
     setLastName(user?.lastName ?? "");
@@ -56,13 +57,10 @@ const Page = () => {
         console.error("Error fetching follow data:", error);
       }
     };
-  
-    
-  
     fetchFollowCounts();
     fetchUserImages(); // Kullanıcı resimlerini component mount olduğunda getir
-  
   }, [user]); // 'user' değiştiğinde veya sayfaya döndüğünüzde bu kod çalışacak
+ 
 
   const fetchUserImages = async () => {
     setLoading(true);
@@ -207,7 +205,7 @@ const Page = () => {
       {/* Bu alan alt sheet kısmıdır */}
       <BottomSheet
         ref={bottomSheetRef}
-        index={1}
+        index={sheetIndex}
         snapPoints={snapPoints}
         enablePanDownToClose={false}
         handleIndicatorStyle={{
@@ -235,7 +233,7 @@ const Page = () => {
               <Text style={{textAlign:'center',fontSize:15,fontWeight:'500'}}>Reels</Text>
             </TouchableOpacity>
           </View>
-          <ScrollView>
+          <ScrollView style={{}}>
               {/* Yükleniyor simgesi */}
               {loading && <ActivityIndicator size="large" color="#FABC3F" />}
 

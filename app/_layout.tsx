@@ -54,6 +54,7 @@ if (!publishableKey) {
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(root)" options={{ headerShown: false }} />
         <Stack.Screen name="(modals)" options={{ headerShown: false }} />
+        <Stack.Screen name="(posts)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
         </ClerkLoaded>

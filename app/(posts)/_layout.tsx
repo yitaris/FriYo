@@ -95,55 +95,6 @@ const Layout = () => (
     }}
   >
     <Tabs.Screen
-      name="userProfile"
-      options={{
-        title: "",
-        tabBarStyle: { display: 'none' },
-        headerShown: true,
-        headerLeft: () => {
-          const router = useRouter();
-          return (
-            <TouchableOpacity
-            onPress={()=>{router.push('/(root)/(tabs)/home')}}
-            style={{padding:12}}
-            >
-              <Image
-                source={icons.arrowLeft}
-                style={{width:50,height:50}}
-              />
-            </TouchableOpacity>
-          );
-        },
-        tabBarIcon: ({ focused }) => <TabIcon focused={focused} source={icons.profile} />,
-      }}
-    />
-    <Tabs.Screen
-      name="notifications"
-      options={{
-        title: "",
-        tabBarStyle: { display: 'none' },
-        headerShown: true,
-        headerStyle: {
-          backgroundColor:'#1a1a1a'
-        },
-        headerLeft: () => {
-          const router = useRouter();
-          return (
-            <TouchableOpacity
-            onPress={()=>{router.push('/(root)/(tabs)/home')}}
-            style={{padding:12}}
-            >
-              <Image
-                source={icons.arrowLeft}
-                style={{width:50,height:50}}
-              />
-            </TouchableOpacity>
-          );
-        },
-        tabBarIcon: ({ focused }) => <TabIcon focused={focused} source={icons.profile} />,
-      }}
-    />
-    <Tabs.Screen
     name="imagePage"
     options={{
       title: "Gönderi",
@@ -158,7 +109,7 @@ const Layout = () => (
         const router = useRouter();
         return (
           <TouchableOpacity
-          onPress={()=>{router.push('/(root)/(tabs)/home')}}
+          onPress={()=>{router.back()}}
           style={{padding:12}}
           >
             <Image

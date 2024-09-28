@@ -221,19 +221,19 @@ const Page = () => {
           height: 50,
         }}
       >
-        <BottomSheetView style={{ flex: 1, backgroundColor: '#1E201E' }}>
-          <View style={{flexDirection:'row',alignItems:'baseline',justifyContent:'center',height:70}}>
-            <TouchableOpacity style={{marginRight:10,backgroundColor:'#FABC3F',padding:10,width:'25%',borderRadius:'10'}}>
+        <BottomSheetView style={{ flex: 1, backgroundColor: '#1E201E',alignItems:'center' }}>
+          <View style={{flexDirection:'row',alignItems:'baseline',justifyContent:'center',height:70,width:'80%'}}>
+            <TouchableOpacity style={{marginRight:10,backgroundColor:'#FABC3F',padding:10,width:'30%',borderRadius:10}}>
               <Text style={{textAlign:'center',fontSize:15,fontWeight:'500'}}>Posts</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={{marginRight:10,backgroundColor:'#FABC3F',padding:10,width:'30%',borderRadius:'10'}}>
-              <Text style={{textAlign:'center',fontSize:15,fontWeight:'500'}}>Ücretli içerik</Text>
+            <TouchableOpacity style={{marginRight:10,backgroundColor:'#FABC3F',padding:10,width:'30%',borderRadius:10}}>
+              <Text style={{textAlign:'center',fontSize:15,fontWeight:'500'}}>Aboneler</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={{marginRight:10,backgroundColor:'#FABC3F',padding:10,width:'25%',borderRadius:'10'}}>
+            <TouchableOpacity style={{backgroundColor:'#FABC3F',padding:10,width:'30%',borderRadius:10}}>
               <Text style={{textAlign:'center',fontSize:15,fontWeight:'500'}}>Reels</Text>
             </TouchableOpacity>
           </View>
-          <ScrollView style={{}}>
+          <ScrollView style={{width:'80%'}}>
               {/* Yükleniyor simgesi */}
               {loading && <ActivityIndicator size="large" color="#FABC3F" />}
 
@@ -242,23 +242,30 @@ const Page = () => {
                 <View style={{ 
                   flexDirection: 'row', 
                   flexWrap: 'wrap', // Satırın taşması durumunda alt satıra geçmesini sağlar
-                  justifyContent: 'flex-start' // Resimler sola hizalanacak
+                  justifyContent: 'flex-start', // Resimler sola hizalanacak
+                  alignItems:'center',
                 }}>
                   {userImage.map((imageUrl, index) => (
                     <View key={index} style={{ 
                       width: '30%', // Ekranın %30'unu kaplar (3 tane sığdırmak için)
                       marginBottom: 10, // Altına boşluk bırakır
-                      marginHorizontal: 5
+                      marginHorizontal: 5,
+                      //backgroundColor:'red'
                     }}>
+                      <TouchableOpacity onPress={() =>{ router.push({ pathname:'/(posts)/imagePage',
+                                                                      params:{userData: JSON.stringify(user), // User objesini string'e çeviriyoruz
+                                                                              index:index,
+                                                                              id:user?.id}})}}>
                       <Image
                         source={{ uri: imageUrl }}
                         style={{
                           width: '100%', // Kapladığı alanı tamamen doldurur
-                          height: 115, // Her resmin yüksekliği
+                          height: 100, // Her resmin yüksekliği
                           borderRadius: 10,
                         }}
                         resizeMode="cover"
                       />
+                      </TouchableOpacity>
                     </View>
                   ))}
                   <TouchableOpacity
@@ -266,9 +273,9 @@ const Page = () => {
                     opacity:0.5,
                     borderWidth:0.5,
                     borderColor:'#FABC3F',
-                    width:'30%',height:115,borderRadius:10,marginHorizontal:5,alignItems:'center',justifyContent:'center'
+                    width:'30%',height:100,borderRadius:10,marginHorizontal:5,alignItems:'center',justifyContent:'center'
                     }}
-                    onPress={onSelectImage}
+                    onPress={() =>{router.push('/(posts)posts')}}
                     >
                     <Image
                     source={icons.plusIcon}
@@ -277,12 +284,28 @@ const Page = () => {
                   </TouchableOpacity>
                 </View>
               )}
-
-              {/* Eğer resim yoksa mesaj göster */}
-              {!loading && userImage.length === 0 && (
-                <Text style={{ textAlign: 'center', color: 'white', marginTop: 20 }}>
+                  
+                {/* Eğer resim yoksa mesaj göster */}
+                {!loading && userImage.length === 0 && (
+                  <View style={{alignItems:'center',width:'100%'}}>
+                    <TouchableOpacity
+                   style={{
+                    opacity:0.5,
+                    borderWidth:0.5,
+                    borderColor:'#FABC3F',
+                    width:'30%',height:100,borderRadius:10,alignItems:'center',justifyContent:'center'
+                    }}
+                    onPress={onSelectImage}
+                    >
+                    <Image
+                    source={icons.plusIcon}
+                    style={{width:50,height:50,opacity:0.5}}
+                    />
+                  </TouchableOpacity>
+                  <Text style={{ textAlign: 'center', color: 'white', marginTop: 20 }}>
                   Henüz resim yüklenmedi.
                 </Text>
+                  </View>
               )}
             </ScrollView>
 
